@@ -1,0 +1,6 @@
+#Linux directory
+.directory
+# KiCad files 
+*.bak 
+# Backup Freecad files
+*.fcstd1
