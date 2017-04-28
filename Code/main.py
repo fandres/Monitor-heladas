@@ -1,7 +1,13 @@
 """
-    This software is free, licensed under GPL v3.
+    DESCRIPCI?N...
+    This software is free, licensed y distributed under GPL v3.
+    (see COPYING) WITHOUT ANY WARRANTY.
+    You can see a description of license here: http://www.gnu.org/copyleft/gpl.html
+    Copyright(c) 2017 by fandres "Fabian Salamanca" <fabian.salamanca@openmailbox.org>
+    Distributed under GPLv3+
     Author - Fabian A. Salamanca F.
 
+    Hardware: ESP8266
     Pin distribution(Default)
     Pin 4   ->  Pin sensor(DHT11/DHT22)
     Pin 2   ->  Debug Visual(Default=Off), Led On Userled: for development board ESP8266
@@ -88,17 +94,57 @@ class Monitoreo():
         " Duerme el dispositivo"
         pass
 
-    def wifi(self):
+    def wifi(self, mode=1):
         "Activa/Desactiva el Wifi "
+        self.wifi_switch = mode
+        if self.wifi_switch == 1:
+            self.configWifi()
+            self.wifiStation()
+        elif self.wifi_switch == 1:
+            sta_if.active(False)
+
+    def configWifi(self):
+        "Metodo usado para configurar lso parametros de la Red Wifi: SSID y PASSWORD"
         pass
 
     def wifiAP(self):
-        "Crea un punto de acceso wifi, actua como anfitrión"
+        "Crea un punto de acceso wifi, actua como anfitri?n"
         pass
 
     def wifiStation(self):
-        "Hace de estación y se conecta con a un servidor u otro dispositivo"
-        pass
+        "Hace de estaci?n (wifi) y se conecta con a un servidor u otro dispositivo"
+        import network
+        # Config
+        WIFISSID = "Koen"
+        WIFIPASS = "/*Casa*/"
+        sta_if = network.WLAN(network.STA_IF)
+        if not sta_if.isconnected():
+            print('connecting to network...')
+            sta_if.active(True)
+            sta_if.connect(WIFISSID, WIFIPASS)
+            while not sta_if.isconnected():
+                print('network config:', sta_if.ifconfig())
+
+    def MQTTclient(self):
+        "Protocolo MQTT en modo cliente, usado apra enviar los datos"
+        from time import sleep_ms
+        from ubinascii import hexlify
+        from machine import unique_id
+        from umqtt import MQTTClient  # import socket
+        # Config
+        SERVER = "192.168.0.101"
+        CLIENT_ID = hexlify(unique_id())
+        TOPIC1 = b"/cultivo/tem"
+        TOPIC2 = b"/cultivo/hum"
+        TOPIC3 = b"/sensor1/led"
+        try:
+            client_mqtt = MQTTClient(CLIENT_ID, server)
+            client_mqtt.connect()
+            client_mqtt.publish(topic, dato)
+            sleep_ms(200)
+            client_mqtt.disconnect()
+        except Exception as e:
+            pass
 
     def interruptMode(self, mode=0):
         "Activa/Desactiva las interrupciones, por tiempo y por cambio de flanco, On:1 | Off:0"
@@ -109,7 +155,7 @@ class Monitoreo():
             self.p_interrupt.irq(trigger=machine.Pin.IRQ_RISING | machine.Pin.IRQ_FALLING, handler=self.callback)
 
     def callback(self, p):
-        "Metodo que se ejecuta una vez ocurrida la interrupción"
+        "Metodo que se ejecuta una vez ocurrida la interrupci?n"
         # print('pin change', p)
         self.break_loop = 0
 
@@ -125,8 +171,14 @@ class Monitoreo():
         self.saveData()
 
 
-ESP8266 = Monitoreo()
-ESP8266.debugMode(1)
-ESP8266.sensorConected("DHT22")
-ESP8266.sensorConected("DHT11")
-ESP8266.loop()
+if __name__ == '__main__':
+    ESP8266 = Monitoreo()
+    try:
+        ESP8266.wifi(1)
+        ESP8266.debugMode(1)
+        ESP8266.sensorConected("DHT22")
+        ESP8266.sensorConected("DHT11")
+        ESP8266.MQTTclient()
+        ESP8266.loop()
+    finally:
+        pass
