@@ -115,8 +115,8 @@ class Monitoreo():
         "Hace de estaci?n (wifi) y se conecta con a un servidor u otro dispositivo"
         import network
         # Config
-        WIFISSID = "Koen"
-        WIFIPASS = "/*Casa*/"
+        WIFISSID = "RED"  # <-----------------CONFIGURE: SDID de Red wifi
+        WIFIPASS = "PASSWORD"  # <-----------------CONFIGURE: PASSWORD de Red wifi
         sta_if = network.WLAN(network.STA_IF)
         if not sta_if.isconnected():
             print('connecting to network...')
@@ -126,23 +126,29 @@ class Monitoreo():
                 print('network config:', sta_if.ifconfig())
 
     def MQTTclient(self):
-        "Protocolo MQTT en modo cliente, usado apra enviar los datos"
+        "Protocolo MQTT en modo cliente, Configuración"
         from time import sleep_ms
         from ubinascii import hexlify
         from machine import unique_id
-        from umqtt import MQTTClient  # import socket
+        from umqtt import MQTTClient  # import socket (library umqtt)
         # Config
-        SERVER = "192.168.0.101"
+        SERVER = "192.168.31.16"  # <-----------------CONFIGURE: BROKER
         CLIENT_ID = hexlify(unique_id())
-        TOPIC1 = b"/cultivo/tem"
-        TOPIC2 = b"/cultivo/hum"
-        TOPIC3 = b"/sensor1/led"
+        self.TOPIC1 = b"/cultivo/temp"
+        self.TOPIC2 = b"/cultivo/hum"
+        self.TOPIC3 = b"/sensor1/set/temp"
+        self.TOPIC4 = b"/sensor1/set/hum"
+        self.TOPIC5 = b"/sensor1/alarma"
+        self.client_mqtt = MQTTClient(CLIENT_ID, SERVER)
+
+    def MQTTSend(self):
+        "Envio Datos mediante el protocolo MQTT"
         try:
-            client_mqtt = MQTTClient(CLIENT_ID, server)
-            client_mqtt.connect()
-            client_mqtt.publish(topic, dato)
+            self.client_mqtt.connect()
+            self.client_mqtt.publish("/cultivo/temp", str(self.s_dht.temperature()))
+            self.client_mqtt.publish("/cultivo/hum", str(self.s_dht.humidity()))
             sleep_ms(200)
-            client_mqtt.disconnect()
+            self.client_mqtt.disconnect()
         except Exception as e:
             pass
 
@@ -160,11 +166,12 @@ class Monitoreo():
         self.break_loop = 0
 
     def loop(self):
-        "Bucle principal en espera de flanco"
+        "Bucle principal, lo termina: flanco/Pin"
         while self.break_loop == 1:  # beak: interrupt, Pin change
             # Sleep Off
             self.readData()  # Lectura de sensores
-            self.saveData()  # si esta ctiva almacena datos
+            self.saveData()  # si esta activa, almacena datos
+            self.MQTTSend()  # Enviar datos mediante el protocolo MQTT
             # Sleep On
             self.pinEndUp()
             time.sleep(1)
