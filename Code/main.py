@@ -134,8 +134,8 @@ class Monitoreo():
         "Hace de estaci?n (wifi) y se conecta con a un servidor u otro dispositivo"
         import network
         # Config
-        WIFISSID = "Koen"  # <-----------------CONFIGURE: SDID de Red wifi
-        WIFIPASS = "/*Casa*/"  # <-----------------CONFIGURE: PASSWORD de Red wifi
+        WIFISSID = "Cultivo_pi"  # <-----------------CONFIGURE: SDID de Red wifi
+        WIFIPASS = "raspberry"  # <-----------------CONFIGURE: PASSWORD de Red wifi
         self.sta_if = network.WLAN(network.STA_IF)
         if not self.sta_if.isconnected():
             print('connecting to network...')
@@ -150,7 +150,7 @@ class Monitoreo():
         from machine import unique_id
         from umqtt import MQTTClient  # import socket library (umqtt)
         # Config
-        SERVER = "192.168.31.16"  # <-----------------CONFIGURE: BROKER
+        SERVER = "169.254.176.163"  # <-----------------CONFIGURE: BROKER
         CLIENT_ID = hexlify(unique_id())
         self.TOPIC1 = b"/cultivo/temp"
         self.TOPIC2 = b"/cultivo/hum"
