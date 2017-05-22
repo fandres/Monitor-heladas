@@ -150,7 +150,7 @@ class Monitoreo():
         from machine import unique_id
         from umqtt import MQTTClient  # import socket library (umqtt)
         # Config
-        SERVER = "169.254.176.163"  # <-----------------CONFIGURE: BROKER
+        SERVER = "172.24.1.1"  # <----------------------------CONFIGURE: BROKER
         CLIENT_ID = hexlify(unique_id())
         self.TOPIC1 = b"/cultivo/temp"
         self.TOPIC2 = b"/cultivo/hum"
@@ -226,9 +226,9 @@ if __name__ == '__main__':
         ESP8266.wifi(1)
         ESP8266.debugMode(1)
         ESP8266.sensorConected("DHT22")
-        ESP8266.sensorConected("DHT11")
+        # ESP8266.sensorConected("DHT11")
         ESP8266.MQTTclient()
-        ESP8266.MQTTReceive()
+        # ESP8266.MQTTReceive()
         ESP8266.loop()
     finally:
         pass

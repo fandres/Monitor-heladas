@@ -1,6 +1,6 @@
 # Arrancar AP
 sudo /usr/sbin/hostapd /etc/hostapd/hostapd.conf
-# Arrancar mosquito(Broker)
+# Arrancar Subscribe mosquito
 mosquitto_sub -h 169.254.176.163 -t /cultivo/temp
 # Si desea comaprtir internet. eth0 -> wlan0
 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE  
