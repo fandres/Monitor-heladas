@@ -22,12 +22,14 @@ import RPi.GPIO as GPIO
 from time import sleep
 
 
-HOSTNAME = "169.254.176.163"  # <---------------------- CONFIGURE BROKER ADDRESS
+HOSTNAME = "172.24.1.1"  # <------------------------------CONFIGURE BROKER ADDRESS
+file = open('data.txt', 'w')
+file.write("TEMP, HUM\n")
 PIN_ALARMA = 17
 PIN_STOP_ALARMA = 4
-SET_TEMP = 30
-SET_HUM = 55
-TIME_SLEEP_ALARMA = 10
+SET_TEMP = 0
+SET_HUM = 80
+TIME_SLEEP_ALARMA = 10800
 alarm_state = 0
 count_alarma = 0
 
@@ -62,6 +64,25 @@ def alarmaCallback(channel):
     sleep(0.2)
 
 
+def saveData(mode, temp, hum):
+    "Guarda los datos en un archivo, On:1 | Off:0"
+    global file
+    data_write = mode
+    data_temp = str(temp)
+    data_hum = str(hum)
+    if data_write == 1:
+        data_write = 2
+        file = open('data.txt', 'w')
+        file.write("TEMP, HUM\n")
+    elif data_write == 2:
+        file.write(data_temp + " , " + data_hum+"\n")
+    elif data_write == 0:
+        data_write = 3
+        file = open('data.txt', 'w')
+        file.write("Data storage off\n")
+        file.close()
+
+
 mqttc = mqtt.Client()
 mqttc.on_message = on_message
 mqttc.on_connect = on_connect
@@ -71,6 +92,8 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(PIN_ALARMA, GPIO.OUT, initial=GPIO.LOW)
 GPIO.setup(PIN_STOP_ALARMA, GPIO.IN, pull_up_down = GPIO.PUD_UP)  # Entrada
 GPIO.add_event_detect(PIN_STOP_ALARMA, GPIO.RISING, callback=alarmaCallback)  # Interrup: Alarma
+saveData(1, 999, 999)
+
 
 try:
     while True:
@@ -78,6 +101,7 @@ try:
         msg_hum = subscribe.simple("/cultivo/hum", hostname=HOSTNAME)
         print("%s %s" % (msg_temp.topic, msg_temp.payload))  # Debug
         print("%s %s" % (msg_hum.topic, msg_hum.payload))  # Debug
+        saveData(2, msg_temp.payload, msg_hum.payload)
         if float(msg_temp.payload) <= SET_TEMP and float(msg_hum.payload) > SET_HUM:
             print(" Helada! Ring Ring")
             if alarm_state == 0:
@@ -101,3 +125,4 @@ try:
             print("Normal")  # Debug
 finally:
     GPIO.cleanup()
+    file.close()

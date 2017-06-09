@@ -209,17 +209,17 @@ class Monitoreo():
         while True:  # beak: interrupt, Pin change
             # Sleep Off
             self.readData()  # Lectura de sensores
-            self.saveData()  # si esta activa, almacena datos
+            # self.saveData()  # si esta activa, almacena datos
             self.MQTTSend()  # Enviar datos mediante el protocolo MQTT
             # self.client_mqtt.wait_msg()  # Recibe datos mediante el Protocolo MQTT
-            self.actuators()
+            # self.actuators()
             # Sleep On
             time.sleep(1)
             # self.pinEndUp()
             # micropython.mem_info()
         self.saveData()
 
-
+#######################     MAIN    #######################
 if __name__ == '__main__':
     ESP8266 = Monitoreo()
     try:
