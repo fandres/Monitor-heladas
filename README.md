@@ -1,3 +1,6 @@
+Repository migrated to https://gitlab.com/fandres323/Monitor-heladas
+Repositorio migrado a https://gitlab.com/fandres323/Monitor-heladas
+
 # Prototipo de monitoreo de heladas
 ![Diagrama de Bloques 1](/images/bloques1.png)
 ![Diagrama de Bloques 2](/images/bloques2.png)
